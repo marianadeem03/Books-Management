@@ -1,32 +1,49 @@
 from django.contrib import admin
-from users.models import Author, Publisher, Book
+from users.models import (Book,
+                          Company,
+                          BookFeedback)
+
+
 # Register your models here.
 
-@admin.register(Author)
-class AuthorAdmin(admin.ModelAdmin):
-    '''Admin View for Author'''
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    """Admin View for Company"""
+    filter_horizontal = ("authors", "publishers")
 
-    list_display = ('name', 'created', 'modified', 'id')
+    list_display = ('name', 'owner', 'created', 'id')
     list_filter = ('created', 'modified')
     readonly_fields = ('created', 'modified')
-    search_fields = ('name',)
+    search_fields = ('name', 'owner__username')
 
 
-@admin.register(Publisher)
-class PublisherAdmin(admin.ModelAdmin):
-    '''Admin View for Publisher'''
+@admin.register(BookFeedback)
+class BookFeedbackAdmin(admin.ModelAdmin):
+    """Admin View for BookFeedback"""
 
-    list_display = ('name', 'created', 'modified', 'id')
-    list_filter = ('created', 'modified')
+    list_display = (
+        'book',
+        'user',
+        'comment_time',
+        'id'
+    )
+    list_filter = ('comment_time', 'rating')
     readonly_fields = ('created', 'modified')
-    search_fields = ('name',)
-
+    search_fields = ('book__title', 'user__username',)
 
     @admin.register(Book)
     class BookAdmin(admin.ModelAdmin):
-        '''Admin View for Book'''
-    
-        list_display = ('title', 'author', 'publisher', 'publish_date')
-        list_filter = ('created', 'modified', 'publish_date')
+        """Admin View for Book"""
+        filter_horizontal = ("authors",)
+
+        list_display = (
+            'title',
+            'publisher',
+            'company',
+            'total_reviews',
+            'rating',
+            'publish_time'
+        )
+        list_filter = ('created', 'publish_time', 'rating',)
         readonly_fields = ('created', 'modified',)
-        search_fields = ('title', 'author__name', 'publisher__name')
+        search_fields = ('title', 'company__name', 'publisher__name')

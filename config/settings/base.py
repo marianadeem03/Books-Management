@@ -50,11 +50,12 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_spectacular",
     "rest_framework_simplejwt.token_blacklist",
+    'django_advanced_password_validation',
 ]
 
 LOCAL_APPS = [
     "auths",
-    # "users",
+    "users",
 ]
 
 
@@ -144,6 +145,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'django_advanced_password_validation.advanced_password_validation.ContainsUppercaseValidator',
+        'OPTIONS': {
+            'min_uppercase': 1
+        }
+    },
+    {
+        'NAME': 'django_advanced_password_validation.advanced_password_validation.ContainsLowercaseValidator',
+        'OPTIONS': {
+            'min_lowercase': 1
+        }
+    },
+    {
+        'NAME': 'django_advanced_password_validation.advanced_password_validation.ContainsSpecialCharactersValidator',
+        'OPTIONS': {
+            'min_characters': 1
+        }
     },
 ]
 

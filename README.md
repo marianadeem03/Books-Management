@@ -4,7 +4,7 @@
 1. pip install virtualenv
 2. virtualenv env
 3. env\scripts\activate
-4. pip install -r requirement.txt
+4. pip install -r requirements.txt
 5. pip manage.py collectstatic
 6. python manage.py runserver
 
