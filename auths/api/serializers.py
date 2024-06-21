@@ -7,9 +7,6 @@ from auths.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(max_length=255, read_only=True)
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
         fields = (
@@ -23,8 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active',
             'last_login',
             'date_joined',
-            'token',
         )
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
 class TokenPairSerializer(TokenObtainPairSerializer):
@@ -36,21 +35,23 @@ class TokenPairSerializer(TokenObtainPairSerializer):
         return user_data
 
 
-class TokenValidationSerializer(serializers.Serializer):
-    token = serializers.CharField(required=True)
-
-    def validate(self, data):
-        token = data.get('token')
-        try:
-            AccessToken(token)
-        except Exception as e:
-            raise serializers.ValidationError({'error': e})
-        return data
-
-
-class SignupSerializer(UserSerializer):
-    class Meta(UserSerializer.Meta):
+class SignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'password',
+            'first_name',
+            'last_name',
+            'role',
+            'is_active',
+            'last_login',
+            'date_joined',
+        )
         extra_kwargs = {
+            'password': {'write_only': True},
             'is_active': {'read_only': True},
             'last_login': {'read_only': True},
             'date_joined': {'read_only': True},
@@ -73,5 +74,4 @@ class SignupSerializer(UserSerializer):
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
-        user.token = AccessToken.for_user(user)
         return user

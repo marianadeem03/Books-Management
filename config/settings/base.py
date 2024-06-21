@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
-from datetime import timedelta
-from pathlib import Path
-
 import environ
+
+from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 env = environ.Env()
@@ -25,12 +26,12 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -46,22 +47,23 @@ DEFAULT_APPS = [
 
 
 THIRD_PARTY_APPS = [
-    "corsheaders",
-    "rest_framework",
-    "drf_spectacular",
-    "rest_framework_simplejwt.token_blacklist",
+    'corsheaders',
+    'rest_framework',
+    'django_filters',
+    'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
     'django_advanced_password_validation',
 ]
 
 LOCAL_APPS = [
-    "auths",
-    "users",
+    'auths',
+    'users',
 ]
 
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,38 +98,43 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DATABASE_NAME"),
-        "USER": env("DATABASE_USER"),
-        "PASSWORD": env("DATABASE_PASSWORD"),
-        "HOST": env("DATABASE_HOST"),
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': '5432',
     }
 }
 
 
-AUTH_USER_MODEL = "auths.User"
+AUTH_USER_MODEL = 'auths.User'
 
 # JWT Token
-JWT_SECRET_KEY = env("JWT_SECRET_KEY")
-SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(days=1)}
+JWT_SECRET_KEY = env('JWT_SECRET_KEY')
+SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=1)}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
 }
+
 # By Default swagger ui is available only to admin user(s). You can change permission classes to change that
 # See more configuration options at https://drf-spectacular.readthedocs.io/en/latest/settings.html#settings
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Books Management API",
-    "DESCRIPTION": "Documentation of API endpoints of Books-Management Project",
-    "VERSION": "1.0.0",
-    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    'TITLE': 'Books Management API',
+    'DESCRIPTION': 'Documentation of API endpoints of Books-Management Project',
+    'VERSION': '1.0.0',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }
 
 # Password validation
@@ -186,8 +193,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = []
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

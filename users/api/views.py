@@ -1,46 +1,59 @@
-from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status, permissions
-from users.models import Book, Company
-from .serializers import BookSerializer, AdminCompanySerializer
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from users.helper import IsAdmin, IsCompanyOwner
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from users.models import (
+    Book,
+    Company,
+    BookFeedback,
+)
+from users.api.serializers import (
+    BookSerializer,
+    AdminCompanySerializer,
+    BookFeedbackSerializer,
+)
+from users.helper import (
+    IsAdminOrUser,
+    IsCompanyOwner,
+    IsAdminOrCompanyOwner,
+    filter_queryset_by_user_role,
+    filter_queryset_by_company_role,
+)
 
 
 class AdminCompanyViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAdminOrCompanyOwner]
     serializer_class = AdminCompanySerializer
     queryset = Company.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['name', 'owner__username', ]
+
+    def get_queryset(self):
+        return filter_queryset_by_company_role(Company, self.request.user)
 
 
-class BookListAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    @staticmethod
-    def get(request):
-        user = request.user
-        if user.role == 'admin' or user.role == 'viewer':
-            books = Book.objects.all()
-        elif Company.objects.filter(owner=user).exists():
-            books = Book.objects.filter(company__owner__in=[user])
-        elif user.role == 'author':
-            books = Book.objects.filter(authors=user)
-        elif user.role == 'publisher':
-            books = Book.objects.filter(publisher=user)
-        else:
-            books = Book.objects.none()
-
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data)
-
-
-class AddBookAPIView(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, IsCompanyOwner]
+class BooksViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsCompanyOwner]
     serializer_class = BookSerializer
     queryset = Book.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['title', 'rating', ]
+    filterset_fields = ['company__id', ]
 
-    def perform_create(self, serializer):
-        company = Company.objects.get(owner=self.request.user)
-        serializer.save(company=company)
+    def get_queryset(self):
+        return filter_queryset_by_user_role(Book, self.request.user)
+
+
+class BookFeedbackViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrUser]
+    serializer_class = BookFeedbackSerializer
+    queryset = BookFeedback.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['book__title', 'rating', ]
+
+    def create(self, request, *args, **kwargs):
+        request.data['user'] = request.user.id
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)

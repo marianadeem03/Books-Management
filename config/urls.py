@@ -2,8 +2,15 @@ from django.conf import settings
 from django.contrib import admin
 from django.views.static import serve
 from django.conf.urls.static import static
-from django.urls import path, re_path as urls, include
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.urls import (
+    path,
+    include,
+    re_path as urls,
+)
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
 

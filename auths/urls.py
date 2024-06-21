@@ -1,7 +1,9 @@
 from django.urls import path
-from auths.api.views import (LoginAPIView,
-                             RegistrationAPIView,
-                             ValidateTokenAPIView)
+from auths.api.views import (
+    LoginAPIView,
+    RegistrationAPIView,
+    ValidateTokenAPIView,
+)
 
 urlpatterns = [
     # Auth

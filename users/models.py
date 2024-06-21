@@ -56,7 +56,11 @@ class BookFeedback(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            existing_feedback = BookFeedback.objects.filter(user=self.user, book=self.book, rating__isnull=True).exists()
+            existing_feedback = BookFeedback.objects.filter(
+                user=self.user,
+                book=self.book,
+                rating__isnull=True
+            ).exists()
             if not existing_feedback:
                 if self.rating is not None:
                     # Update book total reviews and average rating
