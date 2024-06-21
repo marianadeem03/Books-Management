@@ -6,7 +6,7 @@ from auths.models import User
 
 class Company(TimeStampedModel):
     name = models.CharField(max_length=100, unique=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='company_owner')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='company_owner', unique=True)
     authors = models.ManyToManyField(User, related_name='company_authors')
     publishers = models.ManyToManyField(User, related_name='company_publishers')
 

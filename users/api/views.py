@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,7 +25,6 @@ from users.helper import (
 class AdminCompanyViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrCompanyOwner]
     serializer_class = AdminCompanySerializer
-    queryset = Company.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['name', 'owner__username', ]
 
@@ -35,13 +35,27 @@ class AdminCompanyViewSet(viewsets.ModelViewSet):
 class BooksViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyOwner]
     serializer_class = BookSerializer
-    queryset = Book.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['title', 'rating', ]
-    filterset_fields = ['company__id', ]
+    search_fields = ['title', 'rating', 'company__name', ]
 
     def get_queryset(self):
         return filter_queryset_by_user_role(Book, self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+        if user.role != 'admin':
+            # Automatically assign the company based on the user
+            try:
+                company = Company.objects.get(owner=user)
+            except Company.DoesNotExist:
+                raise ValidationError({"company": "Company not found for this user."})
+            data['company'] = company.id  # Assign the company ID
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class BookFeedbackViewSet(viewsets.ModelViewSet):
@@ -53,7 +67,7 @@ class BookFeedbackViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request.data['user'] = request.user.id
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
