@@ -22,6 +22,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
+                #!/bin/bash
                 echo pwd
                 # Ensure the virtual environment exists
                 if [ ! -d "$VENV_DIR" ]; then
