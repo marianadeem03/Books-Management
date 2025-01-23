@@ -29,10 +29,7 @@ pipeline {
                     virtualenv "$VENV_DIR"
                 fi
 
-                source "$VENV_DIR/bin/activate"
-
-                # Install dependencies
-                pip3 install -r requirements.txt
+                bash -c "source $VENV_DIR/bin/activate && pip3 install -r requirements.txt"
                 '''
             }
         }
